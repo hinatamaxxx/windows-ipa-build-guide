@@ -19,7 +19,7 @@ Windows上のWSL2とArch Linuxを使い、Swift/xtool対応のiOSアプリをビ
 | OpenAppleMacrosServer | `cb003a1763b08947dd37376ed8240cbfb4745c32` |
 | rcodesign / ipsw / pymobiledevice3 | 0.29.0 / 3.1.731 / 11.24.0 |
 
-上流は「Mac不要」と説明しています。このガイドで実際に確認したのは、上記の環境でHelloサンプルをビルドし、IPAの構造を検証したところまでです。端末で起動できたという利用者報告はありますが、端末側の署名と導入の経路は確認していません。
+上流は「Mac不要」と説明しています。このガイドでは、上記の環境でHelloサンプルをビルドし、IPAの構造を検証しました。さらに作者が、AltStore Classicで導入したLiveContainerにこのIPAを読み込み、端末上で起動することを確認しています。LiveContainerの導入と使い方は、このガイドでは扱いません。
 
 ## 使い始める
 
