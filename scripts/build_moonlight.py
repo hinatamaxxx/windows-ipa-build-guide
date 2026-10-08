@@ -174,6 +174,8 @@ def main():
         metadata['UIApplicationSceneManifest']=source_info['UIApplicationSceneManifest']
         metadata.pop('UIMainStoryboardFile',None)
         metadata.pop('UIMainStoryboardFile~ipad',None)
+    for key in ('UIViewControllerBasedStatusBarAppearance','UIStatusBarHidden'):
+        if key in source_info: metadata[key]=source_info[key]
     # Xcode's resource build is not the provenance of the locally linked code.
     for key in list(metadata):
         if key.startswith('DT') or key=='BuildMachineOSBuild': metadata.pop(key)
