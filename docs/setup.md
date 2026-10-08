@@ -78,7 +78,7 @@ wsl -d archlinux -- id
 ```bash
 sudo pacman -Syu
 sudo pacman -S --needed base-devel git zip unzip less libimobiledevice openssl \
-  poppler libheif python pkgconf go patchelf libxml2-legacy libedit
+  poppler libheif python pkgconf go patchelf libxml2-legacy libedit librsvg
 ```
 
 ## 3. ガイド自身の取得
@@ -183,6 +183,21 @@ python3 "$GUIDE_DIR/scripts/build_ipa.py" --project "$HOME/HelloOmarchy" \
 ```
 
 新しい出力ディレクトリに未署名IPA、検証JSON、ログができれば、ローカル生成の確認は完了です。別の対応プロジェクトをビルドするときは、`--project` を変更します。上流を別の場所に置いた場合は、`--repo "$OMARCHY_DIR"` を指定します。SDKとSwiftの初期導入は毎回行いません。
+
+### SVGアイコンとSDK番号
+
+SVGを含む画像カタログの変換には `rsvg-convert` が必要です。上記の `librsvg` パッケージに含まれます。`Failed to rasterise SVG asset` と `rsvg-convert: No such file or directory` が出た場合は、WSL内で `sudo pacman -S --needed librsvg` を実行し、`rsvg-convert --version` を確認してから通常ユーザーでビルドし直してください。
+
+この環境では、iPhoneOS 27.0 SDKを使っても、生成された実行ファイルのSDK欄が最低OSと同じ17.0になる場合があります。検証JSONの `source_sdk_version` と `macho_sdk_version` を確認してください。SDKに応じた新しい画面表示を使うアプリでは、この違いにも注意が必要です。
+
+最低OSが17.0、使用するSDKが27.0のSwiftPMターゲットでは、次のリンク設定で実行ファイルのSDK欄が27.0になることを確認しています。SDKの実物に合わせた指定であり、端末の動作確認に代わるものではありません。SDKを更新した場合は値を見直してください。
+
+```swift
+linkerSettings: [.unsafeFlags([
+    "-Xlinker", "-platform_version", "-Xlinker", "ios",
+    "-Xlinker", "17.0", "-Xlinker", "27.0"
+])]
+```
 
 ## 復旧と再利用
 

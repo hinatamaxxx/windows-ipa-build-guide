@@ -78,7 +78,7 @@ From here on, builds run as the normal user. Inside WSL, install only the offici
 ```bash
 sudo pacman -Syu
 sudo pacman -S --needed base-devel git zip unzip less libimobiledevice openssl \
-  poppler libheif python pkgconf go patchelf libxml2-legacy libedit
+  poppler libheif python pkgconf go patchelf libxml2-legacy libedit librsvg
 ```
 
 ## 3. Getting this guide
@@ -183,6 +183,21 @@ python3 "$GUIDE_DIR/scripts/build_ipa.py" --project "$HOME/HelloOmarchy" \
 ```
 
 When a new output directory contains the unsigned IPA, the verification JSON and the log, local generation is confirmed. To build another supported project, change `--project`. If you put upstream elsewhere, pass `--repo "$OMARCHY_DIR"`. Do not redo the initial installation of the SDK and Swift every time.
+
+### SVG icons and the recorded SDK version
+
+Asset catalogs containing SVGs require `rsvg-convert`, provided by the `librsvg` package above. If the build reports `Failed to rasterise SVG asset` and `rsvg-convert: No such file or directory`, run `sudo pacman -S --needed librsvg` inside WSL, check `rsvg-convert --version`, then rebuild as the regular user.
+
+In this environment, a build using the iPhoneOS 27.0 SDK can record 17.0, the minimum OS version, in the executable's SDK field. Check both `source_sdk_version` and `macho_sdk_version` in the verification JSON. This difference matters when an app uses newer system appearance behavior tied to its linked SDK.
+
+For a SwiftPM target with minimum OS 17.0 and SDK 27.0, the following linker settings have been verified to record SDK 27.0 in the executable. The values must match the SDK actually used; this check does not replace device testing. Review them when updating the SDK.
+
+```swift
+linkerSettings: [.unsafeFlags([
+    "-Xlinker", "-platform_version", "-Xlinker", "ios",
+    "-Xlinker", "17.0", "-Xlinker", "27.0"
+])]
+```
 
 ## Recovery and reuse
 
