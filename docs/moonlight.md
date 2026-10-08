@@ -4,7 +4,7 @@
 
 Moonlight iOS 9.0.2のアプリ本体をWSLでコンパイルし、未署名IPAを作ります。Storyboard、アセット、Core Dataモデルと生成クラスは、GitHub ActionsのmacOSランナーで先に生成します。手元のMacは不要ですが、**この経路は完全ローカルではありません**。
 
-対象は[Moonlightの固定commit](https://github.com/moonlight-stream/moonlight-ios/tree/02dc9780496eeeac6d01c8bbdccb8b6fe71ef28a)です。汎用のXcodeプロジェクト変換ツールではありません。2026-10-08に、この版にアプリ内Tailscaleを追加したソースでIPA生成を確認しました。初回の成果物はSceneライフサイクル未対応によりiOS 27.0.1 / LiveContainer 3.8.0で起動時に停止しました。以下の手順にはScene対応パッチを含めています。修正版の実機動作は確認中です。このガイドにTailscale追加コードやIPAは含めていません。
+対象は[Moonlightの固定commit](https://github.com/moonlight-stream/moonlight-ios/tree/02dc9780496eeeac6d01c8bbdccb8b6fe71ef28a)です。汎用のXcodeプロジェクト変換ツールではありません。2026-10-08に、Scene対応パッチを適用した上流ソースと、Tailscale追加ソースの両方でIPA生成を確認しました。Tailscale追加版はiOS 27.0.1 / LiveContainer 3.8.0で起動できましたが、ボタンや一覧の位置・大きさの崩れが報告されています。レイアウトは未修正、配信は未確認です。このガイドにTailscale追加コードやIPAは含めていません。
 
 ## 準備
 
@@ -70,7 +70,7 @@ python3 "$HOME/windows-ipa-build-guide/scripts/build_moonlight.py" \
 
 日時付きディレクトリに未署名IPA、`verification.json`、`SHA256SUMS.txt`、`logs/`を生成します。既存の納品IPAは上書きしません。対象はarm64、最低iOS 15.0です。ビルドではリソースと元ソースのハッシュ、OpenSSLのハッシュ、IPAのZIP CRCを検査し、Mach-Oヘッダーと依存ライブラリをログへ記録します。
 
-確認済みの成果物では、主実行ファイルとOpenSSLがiOS用であること、OpenSSLの参照先と同梱場所、実行権限も確認しました。IPAの生成成功は実機動作の証明ではありません。LiveContainerへの取り込み、署名処理、ログイン、映像・音声・操作は端末で別途確認してください。
+確認済みの成果物では、主実行ファイルとOpenSSLがiOS用であること、OpenSSLの参照先と同梱場所、実行権限も確認しました。IPAの生成成功は実機動作の証明ではありません。上流ソースにScene対応だけを加えた版は実機未確認です。各成果物の取り込み、署名処理、ログイン、映像・音声・操作は端末で別途確認してください。
 
 画面・アセット・データモデルを変更すると既存キットは使えません。ワークフローの参照先と出力元を見直し、変更したリソースから生成し直します。公開ワークフローに非公開ソースや認証情報を追加しないでください。
 

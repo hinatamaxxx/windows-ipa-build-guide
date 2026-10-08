@@ -4,7 +4,7 @@
 
 Compile the Moonlight iOS 9.0.2 application in WSL and package an unsigned IPA. Storyboards, assets, the Core Data model and generated classes are prepared first on a GitHub Actions macOS runner. You do not need your own Mac, but **this route is not fully local**.
 
-The builder targets a [fixed Moonlight commit](https://github.com/moonlight-stream/moonlight-ios/tree/02dc9780496eeeac6d01c8bbdccb8b6fe71ef28a), not arbitrary Xcode projects. On 2026-10-08 it produced an IPA from this revision with embedded Tailscale modifications. The first artifact stopped at launch on iOS 27.0.1 / LiveContainer 3.8.0 because it did not adopt the scene lifecycle. The steps below include a scene migration patch. Device testing of the corrected build is pending. This guide does not include the Tailscale modifications or an IPA.
+The builder targets a [fixed Moonlight commit](https://github.com/moonlight-stream/moonlight-ios/tree/02dc9780496eeeac6d01c8bbdccb8b6fe71ef28a), not arbitrary Xcode projects. On 2026-10-08 it produced IPAs from both upstream sources with the scene patch and sources with embedded Tailscale modifications. The Tailscale variant launched on iOS 27.0.1 / LiveContainer 3.8.0, but misplaced or incorrectly sized buttons and lists were reported. The layout remains unresolved and streaming is unverified. This guide does not include the Tailscale modifications or an IPA.
 
 ## Prepare the environment
 
@@ -70,7 +70,7 @@ If the source contains `TailscaleBridge`, the builder also runs its `build-apple
 
 Each build creates a timestamped directory with an unsigned IPA, `verification.json`, `SHA256SUMS.txt` and `logs/`. Existing delivered IPAs are preserved. The target is arm64 with minimum iOS 15.0. The builder checks resource and source hashes, the OpenSSL hash and IPA ZIP CRC, and logs Mach-O headers and library dependencies.
 
-For the verified artifact, the main executable and OpenSSL were also checked for the iOS platform, matching embedded framework paths and executable permissions. A successful build does not prove device compatibility. LiveContainer import, signing, login, video, audio and input need separate device testing.
+For the verified artifact, the main executable and OpenSSL were also checked for the iOS platform, matching embedded framework paths and executable permissions. A successful build does not prove device compatibility. The upstream variant with only the scene patch has not been tested on a device. Import, signing, login, video, audio and input need separate device testing for each artifact.
 
 Changing screens, assets or the data model invalidates the existing kit. Review the workflow's source reference and regenerate resources from the modified sources. Do not add private sources or credentials to a public workflow.
 

@@ -9,7 +9,7 @@ Windows上のWSL2とArch Linuxを使い、iOSの成果物をビルドする手�
 
 このガイドで扱うのは、環境構築とビルドです。任意のXcodeプロジェクトやtweakがそのまま動くことは保証しません。署名、App Store配布、通常のiPhoneへの直接インストールの手順も含みません。生成物は未署名です。
 
-MoonlightのIPA生成は[専用手順](docs/moonlight.md)を参照してください。IPA生成済みで、実機動作は未確認です。
+MoonlightのIPA生成は[専用手順](docs/moonlight.md)を参照してください。ビルドと一部構成での起動は確認済みですが、レイアウトの不具合が残っています。
 
 ## 検証した構成
 

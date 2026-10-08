@@ -9,7 +9,7 @@ This guide builds iOS artifacts on Windows with WSL2 and Arch Linux. Swift apps 
 
 The guide covers environment setup and builds. It does not promise that an arbitrary Xcode project or tweak builds as is, and it does not cover signing, App Store distribution or installing directly on a stock iPhone. The output is unsigned.
 
-For Moonlight IPA generation, see the [dedicated guide](docs/moonlight.en.md). IPA generation has been verified; device behavior has not.
+For Moonlight IPA generation, see the [dedicated guide](docs/moonlight.en.md). Builds and launch in one configuration have been verified, but layout issues remain.
 
 ## Verified configuration
 
