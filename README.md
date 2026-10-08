@@ -1,8 +1,11 @@
-# WindowsでSwift iOSアプリのIPAをローカル生成する
+# WindowsでiOSのIPAをローカル生成する
 
-Windows上のWSL2とArch Linuxを使い、Swift/xtool対応のiOSアプリをビルドする手順です。GitHub ActionsやMacを使わずに、SwiftUIのHelloアプリから未署名IPAを生成できた構成を記録しています。
+Windows上のWSL2とArch Linuxを使い、iOSの成果物をビルドする手順です。GitHub ActionsやMacは使いません。次の2つの経路を、実際に成功した構成で記録しています。
 
-このガイドで扱うのは、環境構築とローカルビルドです。任意のXcodeプロジェクトがそのまま動くことは保証しません。署名、App Store配布、通常のiPhoneへの直接インストールの手順も含みません。生成物は未署名です。
+- Swift/xtool対応のiOSアプリから未署名IPAを生成する（SwiftUIのHelloアプリで確認）
+- Objective-C/C（必要ならGoのc-archive）のtweak dylibをTheosなしでビルドし、既存IPA内のdylibを差し替える（実在のjailed tweakで確認。手順は[こちら](docs/objc-dylib.md)）
+
+このガイドで扱うのは、環境構築とローカルビルドです。任意のXcodeプロジェクトやtweakがそのまま動くことは保証しません。署名、App Store配布、通常のiPhoneへの直接インストールの手順も含みません。生成物は未署名です。
 
 ## 検証した構成
 
@@ -18,6 +21,7 @@ Windows上のWSL2とArch Linuxを使い、Swift/xtool対応のiOSアプリをビ
 | xtool fork | `f0a1f90efdbb0dc023e276ff529da92618da7a87` |
 | OpenAppleMacrosServer | `cb003a1763b08947dd37376ed8240cbfb4745c32` |
 | rcodesign / ipsw / pymobiledevice3 | 0.29.0 / 3.1.731 / 11.24.0 |
+| Go（tweak dylibのc-archive用） | 1.27.1 |
 
 上流は「Mac不要」と説明しています。このガイドでは、上記の環境でHelloサンプルをビルドし、IPAの構造を検証しました。さらに作者が、AltStore Classicで導入したLiveContainerにこのIPAを読み込み、端末上で起動することを確認しています。LiveContainerの導入と使い方は、このガイドでは扱いません。
 
@@ -41,7 +45,9 @@ python3 "$GUIDE_DIR/scripts/build_ipa.py" --project "$PROJECT_DIR" \
 
 ビルドでは、通常ユーザーで固定版の `ship.sh --device` を実行します。上流スクリプトはこの引数のとき、ビルドとリソース配置だけを行い、端末を操作しません。引数なしの `ship.sh` は永続的なTEST署名IDを作るため、このガイドでは使いません。
 
-対象プロジェクトは、`Package.swift` と `xtool.yml` を持つSwift iOSアプリです。ビルド中に実行される `xtool.env` やSwiftPMプラグインも含め、プロジェクトのコードを確認してからビルドしてください。依存の解決が必要なら、ビルド中にネットワークへアクセスすることがあります。既存のXcodeプロジェクトを変換する場合は上流の変換ツールを参照し、プロジェクトごとに互換性を確認します。
+この経路の対象は、`Package.swift` と `xtool.yml` を持つSwift iOSアプリです。ビルド中に実行される `xtool.env` やSwiftPMプラグインも含め、プロジェクトのコードを確認してからビルドしてください。依存の解決が必要なら、ビルド中にネットワークへアクセスすることがあります。既存のXcodeプロジェクトを変換する場合は上流の変換ツールを参照し、プロジェクトごとに互換性を確認します。
+
+Objective-C/Cのtweak dylibは、同じ環境で `scripts/build_objc_dylib.py` を使ってビルドし、`scripts/replace_ipa_file.py` で既存IPAへ差し替えます。対象になる条件と手順は、[tweak dylibの手順](docs/objc-dylib.md)にまとめています。
 
 ## 出力と検証
 
