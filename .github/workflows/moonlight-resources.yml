@@ -2,11 +2,6 @@ name: Moonlight resource kit
 
 on:
   workflow_dispatch:
-  push:
-    branches: ['build/moonlight-resource-kit']
-    paths:
-      - '.github/workflows/moonlight-resources.yml'
-      - 'scripts/export_moonlight_resources.py'
 
 permissions:
   contents: read

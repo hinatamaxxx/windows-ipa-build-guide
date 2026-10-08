@@ -1,0 +1,78 @@
+--- a/Limelight/AppDelegate.m
++++ b/Limelight/AppDelegate.m
+@@ -8,6 +8,27 @@
+ 
+ #import "AppDelegate.h"
+ 
++#if !TARGET_OS_TV
++@interface MoonlightSceneDelegate : UIResponder <UIWindowSceneDelegate>
++@property (strong, nonatomic) UIWindow *window;
++@end
++
++@implementation MoonlightSceneDelegate
++- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
++    AppDelegate *delegate = (AppDelegate *)UIApplication.sharedApplication.delegate;
++    delegate.window = self.window;
++}
++- (void)sceneDidEnterBackground:(UIScene *)scene {
++    [(AppDelegate *)UIApplication.sharedApplication.delegate saveContext];
++}
++- (void)windowScene:(UIWindowScene *)windowScene performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL))completionHandler {
++    AppDelegate *delegate = (AppDelegate *)UIApplication.sharedApplication.delegate;
++    delegate.pcUuidToLoad = shortcutItem.userInfo[@"UUID"];
++    delegate.shortcutCompletionHandler = completionHandler;
++}
++@end
++#endif
++
+ @implementation AppDelegate
+ 
+ @synthesize managedObjectContext = _managedObjectContext;
+@@ -33,6 +54,17 @@
+ }
+ 
+ #if !TARGET_OS_TV
++- (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options {
++    if (options.shortcutItem != nil) {
++        self.pcUuidToLoad = options.shortcutItem.userInfo[@"UUID"];
++    }
++    UISceneConfiguration *configuration = [[UISceneConfiguration alloc] initWithName:@"Moonlight" sessionRole:session.role];
++    configuration.delegateClass = MoonlightSceneDelegate.class;
++    NSString *storyboardName = UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad ? @"iPad" : @"iPhone";
++    configuration.storyboard = [UIStoryboard storyboardWithName:storyboardName bundle:nil];
++    return configuration;
++}
++
+ - (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL succeeded))completionHandler {
+     _pcUuidToLoad = (NSString*)[shortcutItem.userInfo objectForKey:@"UUID"];
+     _shortcutCompletionHandler = completionHandler;
+--- a/Limelight/Limelight-Info.plist
++++ b/Limelight/Limelight-Info.plist
+@@ -62,10 +62,23 @@
+ 	<true/>
+ 	<key>UILaunchStoryboardName</key>
+ 	<string>Launch Screen</string>
+-	<key>UIMainStoryboardFile</key>
+-	<string>iPhone</string>
+-	<key>UIMainStoryboardFile~ipad</key>
+-	<string>iPad</string>
++	<key>UIApplicationSceneManifest</key>
++	<dict>
++		<key>UIApplicationSupportsMultipleScenes</key>
++		<false/>
++		<key>UISceneConfigurations</key>
++		<dict>
++			<key>UIWindowSceneSessionRoleApplication</key>
++			<array>
++				<dict>
++					<key>UISceneConfigurationName</key>
++					<string>Moonlight</string>
++					<key>UISceneDelegateClassName</key>
++					<string>MoonlightSceneDelegate</string>
++				</dict>
++			</array>
++		</dict>
++	</dict>
+ 	<key>UIRequiredDeviceCapabilities</key>
+ 	<array>
+ 		<string>armv7</string>

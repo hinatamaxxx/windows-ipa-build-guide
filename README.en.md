@@ -2,12 +2,14 @@
 
 [日本語](README.md) | English
 
-This guide builds iOS artifacts on Windows with WSL2 and Arch Linux, without GitHub Actions or a Mac. It records two routes, each with a configuration that actually worked:
+This guide builds iOS artifacts on Windows with WSL2 and Arch Linux. Swift apps and tweak dylibs are built without GitHub Actions or a Mac. A separate Moonlight route prepares resources on a GitHub Actions macOS runner and builds the application in WSL.
 
 - Build an unsigned IPA from a Swift/xtool iOS app (verified with a SwiftUI Hello app)
 - Build an Objective-C/C tweak dylib (optionally with a Go c-archive) without Theos, and swap it into an existing IPA (verified with a real jailed tweak; see [the dylib guide](docs/objc-dylib.en.md))
 
-The guide covers environment setup and local builds only. It does not promise that an arbitrary Xcode project or tweak builds as is, and it does not cover signing, App Store distribution or installing directly on a stock iPhone. The output is unsigned.
+The guide covers environment setup and builds. It does not promise that an arbitrary Xcode project or tweak builds as is, and it does not cover signing, App Store distribution or installing directly on a stock iPhone. The output is unsigned.
+
+For Moonlight IPA generation, see the [dedicated guide](docs/moonlight.en.md). IPA generation has been verified; device behavior has not.
 
 ## Verified configuration
 
@@ -75,6 +77,6 @@ The same recovery section explains how to resume when the first-time setup stops
 
 This repository does not distribute Apple's SDK, Xcode.xip, IPAs, signing keys or account information. Obtain Apple's software yourself through official channels and check the terms that apply. This guide does not change Apple's terms or distribution requirements. Delivering files to iCloud or elsewhere is a separate step from the build.
 
-The documents and helper scripts written for this repository are under the [MIT License](LICENSE). Upstream code is neither copied nor bundled; pinned commits are referenced instead. The [omarchy-apple-dev license](https://github.com/joshuaswarren/omarchy-apple-dev/blob/acd373c72e3500c66c5fdcd2ab0bcbda6e6f6942/LICENSE) and the terms of each dependency and of Apple's software apply independently.
+The documents and independent helper scripts written for this repository are under the [MIT License](LICENSE). The Moonlight patch is under [GNU GPL v3](patches/LICENSE-Moonlight.txt), and generated resources retain the upstream license. The [omarchy-apple-dev license](https://github.com/joshuaswarren/omarchy-apple-dev/blob/acd373c72e3500c66c5fdcd2ab0bcbda6e6f6942/LICENSE) and the terms of each dependency and of Apple's software apply independently.
 
-Writing assistance for the documents and helper scripts: Codex (GPT-6.1 Sol, reasoning setting not recorded). Proofreading of the published Japanese documents: Gemini 3.8 Flash / High. Review, revision and English translation: Claude Code (Claude Opus 5.5).
+Writing assistance for the documents and helper scripts: Codex (GPT-6.1 Sol, reasoning setting not recorded). Earlier Japanese proofreading: Gemini 3.8 Flash / High. Review, revision and English translation: Claude Code (Claude Opus 5.5). Moonlight build support and documentation: Codex (GPT-6 Astra / Low), with local yomiyasu v1.1.0 for Japanese proofreading.

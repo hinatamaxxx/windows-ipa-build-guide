@@ -2,12 +2,14 @@
 
 日本語 | [English](README.en.md)
 
-Windows上のWSL2とArch Linuxを使い、iOSの成果物をビルドする手順です。GitHub ActionsやMacは使いません。次の2つの経路を、実際に成功した構成で記録しています。
+Windows上のWSL2とArch Linuxを使い、iOSの成果物をビルドする手順です。Swiftアプリとtweak dylibはGitHub ActionsやMacを使わずに生成します。Moonlight向けには、リソース生成だけをGitHub ActionsのmacOS環境で行う経路も用意しています。
 
 - Swift/xtool対応のiOSアプリから未署名IPAを生成する（SwiftUIのHelloアプリで確認）
 - Objective-C/C（必要ならGoのc-archive）のtweak dylibをTheosなしでビルドし、既存IPA内のdylibを差し替える（実在のjailed tweakで確認。手順は[こちら](docs/objc-dylib.md)）
 
-このガイドで扱うのは、環境構築とローカルビルドです。任意のXcodeプロジェクトやtweakがそのまま動くことは保証しません。署名、App Store配布、通常のiPhoneへの直接インストールの手順も含みません。生成物は未署名です。
+このガイドで扱うのは、環境構築とビルドです。任意のXcodeプロジェクトやtweakがそのまま動くことは保証しません。署名、App Store配布、通常のiPhoneへの直接インストールの手順も含みません。生成物は未署名です。
+
+MoonlightのIPA生成は[専用手順](docs/moonlight.md)を参照してください。IPA生成済みで、実機動作は未確認です。
 
 ## 検証した構成
 
@@ -75,6 +77,6 @@ SDK登録後に初回構築が途中で止まった場合の再開方法と、�
 
 AppleのSDK、Xcode.xip、IPA、署名鍵、アカウント情報は配布していません。Appleの配布物は本人が公式の経路で取得し、適用される規約を確認してください。このガイドはAppleの規約や配布要件を変更しません。iCloudなどへの納品は、ビルドとは別の操作です。
 
-本リポジトリの自作文書と補助スクリプトは [MIT License](LICENSE) です。上流のコードは転載も同梱もせず、固定commitを参照します。[omarchy-apple-devのライセンス](https://github.com/joshuaswarren/omarchy-apple-dev/blob/acd373c72e3500c66c5fdcd2ab0bcbda6e6f6942/LICENSE)と、各依存やAppleの配布物の条件は、それぞれ独立しています。
+本リポジトリの自作文書と独立した補助スクリプトは [MIT License](LICENSE) です。Moonlight用のパッチは[GNU GPL v3](patches/LICENSE-Moonlight.txt)で、生成リソースにも上流のライセンスが適用されます。[omarchy-apple-devのライセンス](https://github.com/joshuaswarren/omarchy-apple-dev/blob/acd373c72e3500c66c5fdcd2ab0bcbda6e6f6942/LICENSE)と、各依存やAppleの配布物の条件は、それぞれ独立しています。
 
-文書・自作補助スクリプトの作成支援: Codex（GPT-6.1 Sol、推論設定は未記録）。公開文書の校正: Gemini 3.8 Flash / High。見落としの点検と改訂: Claude Code（Claude Opus 5.5）。
+文書・自作補助スクリプトの作成支援: Codex（GPT-6.1 Sol、推論設定は未記録）。従来の公開文書の校正: Gemini 3.8 Flash / High。見落としの点検と改訂: Claude Code（Claude Opus 5.5）。Moonlight向けビルドと文書の追加: Codex（GPT-6 Astra / Low〈低〉）、日本語校正はローカルのyomiyasu v1.1.0。
