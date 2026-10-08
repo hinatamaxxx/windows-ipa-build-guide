@@ -1,5 +1,7 @@
 # Objective-C/Cのtweak dylibと既存IPAの差し替え
 
+日本語 | [English](objc-dylib.en.md)
+
 Swift/xtoolアプリのほかに、Objective-CやC（必要ならGoのc-archive）で書かれたjailed（サイドロード用）tweak dylibも、同じWSL環境でビルドできます。TheosやMacは使いません。使うのは、[初回の環境構築](setup.md)で準備したSwiftのclang、darwin Swift SDK内のiPhoneOS SDKと `ld64.lld`、SDKに含まれるXcodeツールチェーンの `libclang_rt.ios.a` です。
 
 2026-10-08に、実在のjailed tweakのdylibをこの手順でビルドしました。CIのTheos版と比べ、依存ライブラリの組とシンボルが一致することを確認しています。作ったdylibを既存のIPAへ差し替えて、IPAを書き出すところまで成功しました。実機での読み込みは、このガイドでは確認していません。

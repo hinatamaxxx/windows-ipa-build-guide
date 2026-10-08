@@ -1,5 +1,7 @@
 # WindowsでiOSのIPAをローカル生成する
 
+日本語 | [English](README.en.md)
+
 Windows上のWSL2とArch Linuxを使い、iOSの成果物をビルドする手順です。GitHub ActionsやMacは使いません。次の2つの経路を、実際に成功した構成で記録しています。
 
 - Swift/xtool対応のiOSアプリから未署名IPAを生成する（SwiftUIのHelloアプリで確認）
