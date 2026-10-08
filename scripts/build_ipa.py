@@ -17,6 +17,8 @@ import zipfile
 
 COMMIT = 'acd373c72e3500c66c5fdcd2ab0bcbda6e6f6942'
 SHIP_HASH = 'a79d42afc6d253f968d0e7a43b41c7d577d0db1766d8cdd9b79ddae2a1ee10ef'
+# ship.sh --device imports placeholder_hits from tools/asc.py; review it together with ship.sh.
+ASC_HASH = '6d5fa9d3ebf44c3fb7c43971e9d0e10035c5bed9a4b38ce2047d7316e3d3d81e'
 SPEC_HASHES = {
     'SwiftBuild_SWBUniversalPlatform.bundle/CopyStringsFile.xcspec':
         'ff64429a04f70c1cc2d91679eec7672d1eb62aaa14733e5bcd7940b9159f0faa',
@@ -144,6 +146,8 @@ def environment(args):
     repo = (args.repo or Path.home() / 'omarchy-apple-dev-acd373c').expanduser().resolve(strict=True)
     ship = repo / 'ship.sh'
     require(sha256(ship) == SHIP_HASH, 'ship.sh differs from the reviewed fixed commit; review before execution')
+    require(sha256(repo / 'tools/asc.py') == ASC_HASH,
+            'tools/asc.py differs from the reviewed fixed commit; review before execution')
     swift_bin = (args.swift_bin or Path('/usr/lib/swift/usr/bin')).expanduser().resolve(strict=True)
     swift = swift_bin / 'swift'
     require(swift.is_file() and os.access(swift, os.X_OK), 'Missing executable Swift')
@@ -152,7 +156,12 @@ def environment(args):
         env.pop(key, None)
     env['PATH'] = str(swift_bin) + ':' + str(Path.home() / '.local/bin') + ':' + env.get('PATH', '')
     require(shutil.which('xtool', path=env['PATH']) is not None, 'xtool is not installed')
-    require((Path.home() / 'pymobile3-venv/bin/python').is_file(), 'Missing ship.sh resource-processing Python')
+    python = Path.home() / 'pymobile3-venv/bin/python'
+    require(python.is_file(), 'Missing ship.sh resource-processing Python')
+    # An Arch python minor upgrade leaves the venv unusable; ship.sh needs plistlib and asc.py's cryptography.
+    venv = subprocess.run([str(python), '-c', 'import plistlib, cryptography'], env=env,
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    require(venv.returncode == 0, 'pymobile3-venv cannot import cryptography; recreate it (docs/setup.md)')
     swift_version = subprocess.check_output([str(swift), '--version'], env=env, text=True).strip()
     require('Swift version 6.4 ' in swift_version, 'Swift version changed; review compatibility before building')
     sdk_list = subprocess.check_output([str(swift), 'sdk', 'list'], env=env, text=True).splitlines()
@@ -171,7 +180,7 @@ def environment(args):
         require(sha256(specs / relative) == expected,
                 f'SwiftBuild compatibility file changed: {relative}; consult docs/setup.md')
     metadata = {'project': str(project), 'repo': str(repo), 'reviewed_source_commit': COMMIT,
-                'ship_sha256': SHIP_HASH, 'swift_version': swift_version,
+                'ship_sha256': SHIP_HASH, 'asc_sha256': ASC_HASH, 'swift_version': swift_version,
                 'registered_sdks': sdk_list, 'source_sdk_version': settings['Version'],
                 'sdk_path': str(sdk), 'swiftbuild_spec_hashes': SPEC_HASHES}
     return project, ship, env, metadata
@@ -185,7 +194,7 @@ def main():
     parser.add_argument('--sdk', type=Path)
     parser.add_argument('--output-dir', type=Path)
     parser.add_argument('--bundle-id')
-    parser.add_argument('--app-name', help='Exact leaf name such as HelloOmarchy.app')
+    parser.add_argument('--app-name', help='Expected leaf name such as HelloOmarchy.app')
     parser.add_argument('--check', action='store_true', help='Read-only environment check; no build or output files')
     args = parser.parse_args()
     project, ship, env, metadata = environment(args)
@@ -193,6 +202,11 @@ def main():
         print(json.dumps({'environment_check': 'passed', **metadata}, indent=2))
         return
     require(args.output_dir is not None, 'Building requires --output-dir')
+    if args.app_name:
+        require(Path(args.app_name).name == args.app_name and args.app_name.endswith('.app'), 'Invalid --app-name')
+    # ship.sh processes only the first xtool/*.app it finds, so a stale second app could be packaged unprocessed.
+    stale = sorted(p.name for p in (project / 'xtool').glob('*.app') if p.is_dir())
+    require(len(stale) <= 1, f'Several apps under xtool/: {stale}; move the stale ones out of xtool/ first')
     output = args.output_dir.expanduser().resolve()
     output.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime('%Y-%m-%d_%H-%M-%S-%f_UTC__')
@@ -203,11 +217,9 @@ def main():
                                    stdout=stream, stderr=subprocess.STDOUT)
     require(completed.returncode == 0, f'Build failed ({completed.returncode}); inspect {log}. No installer was run.')
     apps = sorted(p for p in (project / 'xtool').glob('*.app') if p.is_dir())
-    if args.app_name:
-        require(Path(args.app_name).name == args.app_name and args.app_name.endswith('.app'), 'Invalid --app-name')
-        apps = [p for p in apps if p.name == args.app_name]
-    require(len(apps) == 1, f'Expected one app, found {len(apps)}; specify --app-name if needed')
+    require(len(apps) == 1, f'Expected one app under xtool/, found {len(apps)}')
     app = apps[0]
+    require(args.app_name is None or app.name == args.app_name, f'Built app is {app.name}, not {args.app_name}')
     ipa = run / (app.stem + '-unsigned.ipa')
     try:
         report = package_app(app, ipa, args.bundle_id)
